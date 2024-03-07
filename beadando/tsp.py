@@ -76,44 +76,33 @@ kernel_code = """
 __kernel void local_search(__global const double* tsp, const int tsp_size, __global const int* initial_order, const int order_size, __global int* new_order, __global double* best_dist) {
     int cityIndex = get_global_id(0);
 
-    // Distance matrix
-    double distances[150][2];
-    for (int i = 0; i < 150; ++i) {
-        for (int j = 0; j < 2; ++j) {
-            distances[i][j] = 0; // initialize distances
-        }
-    }
+    double totalDist = 0.0;
 
-
-    for (int i = 0; i < 150; ++i) {
-        for (int j = 0; j < 2; ++j) {
-            int index1 = initial_order[i];
-            int index2 = initial_order[j];
-            double dx = tsp[index1 * 3] - tsp[index2 * 3];
-            double dy = tsp[index1 * 3 + 1] - tsp[index2 * 3 + 1];
-            distances[i][j] = sqrt(dx*dx + dy*dy); // Euclidean distance
-        }
-    }
-
+    // Initialize visited array
     int visited[150];
     for (int i = 0; i < 150; ++i) {
         visited[i] = 0;
     }
 
-    int currentCity = cityIndex;
+    int currentCity = initial_order[cityIndex];
     visited[currentCity] = 1;
     new_order[0] = currentCity;
 
-    double totalDist = 0.0;
-
     for (int i = 1; i < 150; ++i) {
         int nearestCity = -1;
-        double shortestDist = 1e9;
+        double shortestDist = DBL_MAX;
 
         for (int j = 0; j < 150; ++j) {
-            if (!visited[j] && distances[currentCity][j] < shortestDist) {
-                shortestDist = distances[currentCity][j];
-                nearestCity = j;
+            if (!visited[j]) {
+                int nextCity = initial_order[j];
+                double dx = tsp[currentCity * 3] - tsp[nextCity * 3];
+                double dy = tsp[currentCity * 3 + 1] - tsp[nextCity * 3 + 1];
+                double dist = sqrt(dx*dx + dy*dy);
+
+                if (dist < shortestDist) {
+                    shortestDist = dist;
+                    nearestCity = nextCity;
+                }
             }
         }
 
