@@ -60,7 +60,6 @@ def run_opencl_kernel(kernel_code, kernel_name, x, n):
     
     cl.enqueue_copy(queue, result, result_buffer).wait()
 
-    queued_time = event.get_profiling_info(cl.profiling_info.QUEUED)
     start_time = event.get_profiling_info(cl.profiling_info.START)
     end_time = event.get_profiling_info(cl.profiling_info.END)
     execution_time = end_time - start_time
@@ -146,7 +145,7 @@ def seq_exp_taylor(x, n):
 def main():
     x = 1.0
     n = 10000
-    thread_count = 4
+    thread_count = 7
 
     print("Párhuzamosított Taylor sorok:")
     cos_taylor(x, n, thread_count)
