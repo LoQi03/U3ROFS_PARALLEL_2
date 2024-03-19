@@ -46,8 +46,8 @@ def run_opencl_kernel(kernel_code, kernel_name, x, n):
     platform = cl.get_platforms()[0]
     device = platform.get_devices()[0]
     context = cl.Context([device])
-    queue = cl.CommandQueue(context)
-
+    queue = cl.CommandQueue(context, properties=cl.command_queue_properties.PROFILING_ENABLE)
+    
     program = cl.Program(context, kernel_code).build()
 
     result = np.zeros(n, dtype=np.float32)
@@ -55,16 +55,21 @@ def run_opencl_kernel(kernel_code, kernel_name, x, n):
     result_buffer = cl.Buffer(context, cl.mem_flags.WRITE_ONLY, result.nbytes)
 
     kernel = getattr(program, kernel_name)
-    kernel(queue, result.shape, None, result_buffer, np.float32(x), np.int32(n))
-
+    
+    event = kernel(queue, result.shape, None, result_buffer, np.float32(x), np.int32(n))
+    
     cl.enqueue_copy(queue, result, result_buffer).wait()
 
-    return result
+    queued_time = event.get_profiling_info(cl.profiling_info.QUEUED)
+    start_time = event.get_profiling_info(cl.profiling_info.START)
+    end_time = event.get_profiling_info(cl.profiling_info.END)
+    execution_time = end_time - start_time
+
+    return result, execution_time
 
 def test_opencl_taylor(func, x, n):
-    start = time.time()
-    result = run_opencl_kernel(kernel_code, f"taylor_{func}", x, n)
-    print(f"taylor_{func}({x}) = {np.sum(result)}\t ido: {time.time() - start}")
+    result,execution_time = run_opencl_kernel(kernel_code, f"taylor_{func}", x, n)
+    print(f"taylor_{func}({x}) = {np.sum(result)}\t ido: {execution_time/1e6}")
 
 def factorial(n):
     result = 1.0
@@ -139,7 +144,6 @@ def seq_exp_taylor(x, n):
     return result
 
 def main():
-    # Tesztelés
     x = 1.0
     n = 10000
     thread_count = 4
