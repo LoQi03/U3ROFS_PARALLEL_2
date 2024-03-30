@@ -94,8 +94,8 @@ def seq_sin_maclaurin(x, n):
 
 def main():
     x = 1.0
-    n_values = [1000, 5000, 10000, 20000, 50000, 100000]
-    thread_count = 7
+    n_values = [1000, 5000, 10000, 20000, 50000, 100000, 150000]
+    thread_count = 4
 
     kernel_times = []
     para_times = []
@@ -133,6 +133,10 @@ def main():
     plt.xticks(n_values, labels=n_values)
     plt.tight_layout()
     plt.show()
+
+    for i in range(len(n_values)):
+        print(
+            f"n = {n_values[i]}:\n\tKernel: {kernel_times[i]}\n\tPárhuzamosított: {para_times[i]}\n\tSzekvenciális: {seq_times[i]}")
 
 
 if __name__ == "__main__":
