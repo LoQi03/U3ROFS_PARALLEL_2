@@ -4,6 +4,8 @@
 
 ## Téma: Maclaurin series
 
+## Programozási nyelv: Python
+
 ### Leírás:
 
 A projekt célja a **sin(x)** függvény közelítésének sebességének növelése volt a Maclaurin-sor használatával, kihasználva a párhuzamosítás előnyeit. Három különböző megközelítést vizsgáltunk meg a közelítés gyorsaságának fokozása érdekében, az alábbiak szerint:
