@@ -26,12 +26,12 @@ def run_opencl_kernel(kernel_code, kernel_name, x, start, end):
     program = cl.Program(context, kernel_code).build()
 
     result_size = end - start
-    result = np.zeros(result_size, dtype=np.float32)
+    result = np.zeros(result_size, dtype=np.float64)
     result_buffer = cl.Buffer(context, cl.mem_flags.WRITE_ONLY, result.nbytes)
 
     kernel = getattr(program, kernel_name)
     event = kernel(queue, (result_size,), None, result_buffer,
-                   np.float32(x), np.int32(start), np.int32(end))
+                   np.float64(x), np.int32(start), np.int32(end))
 
     cl.enqueue_copy(queue, result, result_buffer).wait()
 
